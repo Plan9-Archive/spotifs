@@ -238,11 +238,11 @@ static void
 usage(void)
 {
 	fprint(2, "usage: spotifs [-u user] [-s srvname] [-m mtpt]\n");
-	exits("usage");
+	threadexitsall("usage");
 }
 
 static void
-netproc(void*)
+netproc(void *)
 {
 	int cmd;
 	Msg *m;

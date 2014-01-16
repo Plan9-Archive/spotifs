@@ -79,7 +79,6 @@ enum {
 	BrowseTrack=	3,
 };
 
-typedef struct Msg Msg;
 struct Msg {
 	int type;
 	void *req;

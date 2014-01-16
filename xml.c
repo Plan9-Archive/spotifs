@@ -14,7 +14,7 @@ enum {
 	 * One expects to get <tracks><track></track><track></track></tracks>
 	 * structure in XML. This is what you get on "search" query.
 	 * One gets <discs><disc></disc>...</discs>, which is correct as well.
-	 * But then someone from Spotify decided to have THIS:
+	 * But then THIS:
 	 * <discs>
 	 *   <disc>
 	 *     <disc-number></disc-number>
@@ -23,7 +23,6 @@ enum {
 	 *     <track></track>
 	 *     <track></track>
 	 *     ....
-	 * Thank you, Spotify!
 	 */
 	Tlist2,
 
@@ -31,11 +30,11 @@ enum {
 	Tfloat,
 	Tint,
 	Tbool,
-	Tfid,	/* 20 bytes */
-	Tid,	/* 16 bytes */
+	Tfid, /* 20 bytes */
+	Tid,  /* 16 bytes */
 
-	Stflinl=	1,
-	Stflerr=	2,
+	Stflinl= 1,
+	Stflerr= 2,
 };
 
 typedef struct Xml Xml;
@@ -48,9 +47,9 @@ struct Xml {
 };
 
 typedef struct {
-	int		flags;
-	char	*t;		/* current tag */
-	int		indent;	/* to debug stuff */
+	int  flags;
+	char *t;     /* current tag */
+	int  indent; /* to debug stuff */
 }State;
 
 #define end {nil, 0, nil}
@@ -68,105 +67,105 @@ static Xml artist;
 static Xml album;
 
 static Xml img[] = {
-	{"id",			Tfid,	nil,	offsetof(Img, id[0]),		0},
-	{"width",		Tint,	nil,	offsetof(Img, width),		0},
-	{"height",		Tint,	nil,	offsetof(Img, height),		0},
-	{"small",		Tfid,	nil,	offsetof(Img, small[0]),	0},
-	{"large",		Tfid,	nil,	offsetof(Img, large[0]),	0},
+	{"id",     Tfid, nil, offsetof(Img, id[0]),    0},
+	{"width",  Tint, nil, offsetof(Img, width),    0},
+	{"height", Tint, nil, offsetof(Img, height),   0},
+	{"small",  Tfid, nil, offsetof(Img, small[0]), 0},
+	{"large",  Tfid, nil, offsetof(Img, large[0]), 0},
 	end
 };
 
 static Xml biofields[] = {
-	{"text",		Tstr,	nil,	offsetof(Bio, text),		0},
+	{"text", Tstr, nil, offsetof(Bio, text), 0},
 	end
 };
 
 static Xml bio = {"bio", Tcmplx, biofields, 0, sizeof(Bio)};
 
 static Xml copy[] = {
-	{"c",			Tstr,	nil,	offsetof(Copy, c),			0},
-	{"p",			Tstr,	nil,	offsetof(Copy, p),			0},
+	{"c", Tstr, nil, offsetof(Copy, c), 0},
+	{"p", Tstr, nil, offsetof(Copy, p), 0},
 	end
 };
 
 static Xml artistfields[] = {
-	{"popularity",		Tfloat,	nil,		offsetof(Artist, pop),		0},
-	{"name",			Tstr,	nil,		offsetof(Artist, name),		0},
-	{"portrait",		Tcmplx,	img,		offsetof(Artist, img),		sizeof(Img)},
-	{"bios",			Tlist,	&bio,		offsetof(Artist, bios),		0},
-	{"genres",			Tstr,	nil,		offsetof(Artist, genres),	0},
-	{"years-active",	Tstr,	nil,		offsetof(Artist, years),	0},
-	{"tophits",			Tlist,	&track,		offsetof(Artist, top),		0},
-	{"similar-artists",	Tlist,	&artist,	offsetof(Artist, ≈),		0},
-	{"albums",			Tlist,	&album,		offsetof(Artist, albums),	0},
-	{"id", 				Tid,	nil,		offsetof(Artist, id[0]),	0},
+	{"popularity",      Tfloat, nil,     offsetof(Artist, pop),     0},
+	{"name",            Tstr,   nil,     offsetof(Artist, name),    0},
+	{"portrait",        Tcmplx, img,     offsetof(Artist, img),     sizeof(Img)},
+	{"bios",            Tlist,  &bio,    offsetof(Artist, bios),    0},
+	{"genres",          Tstr,   nil,     offsetof(Artist, genres),  0},
+	{"years-active",    Tstr,   nil,     offsetof(Artist, years),   0},
+	{"tophits",         Tlist,  &track,  offsetof(Artist, top),     0},
+	{"similar-artists", Tlist,  &artist, offsetof(Artist, similar), 0},
+	{"albums",          Tlist,  &album,  offsetof(Artist, albums),  0},
+	{"id",              Tid,    nil,     offsetof(Artist, id[0]),   0},
 	end
 };
 
 static Xml artist = {"artist", Tcmplx, artistfields, 0, sizeof(Artist)};
 
 static Xml discfields[] = {
-	{"disc-number",	Tint,	nil,	offsetof(Disc, n),			0},
-	{"name",		Tstr,	nil,	offsetof(Disc, name),		0},
-	{"track",		Tlist2,	&track,	offsetof(Disc, tracks),		0},
+	{"disc-number", Tint,   nil,    offsetof(Disc, n),      0},
+	{"name",        Tstr,   nil,    offsetof(Disc, name),   0},
+	{"track",       Tlist2, &track, offsetof(Disc, tracks), 0},
 	end
 };
 
 static Xml disc = {"disc", Tcmplx, discfields, 0, sizeof(Disc)};
 
 static Xml albumfields[] = {
-	{"popularity",	Tfloat,	nil,	offsetof(Album, pop),		0},
-	{"name",		Tstr,	nil,	offsetof(Album, name),		0},
-	{"artist-name",	Tstr,	nil,	offsetof(Album, aname),		0},
-	{"album-type",	Tstr,	nil,	offsetof(Album, atype),		0},
-	{"review",		Tstr,	nil,	offsetof(Album, review),	0},
-	{"copyright",	Tcmplx,	copy,	offsetof(Album, ©),			sizeof(Copy)},
-	{"discs",		Tlist,	&disc,	offsetof(Album, discs),		0},
-	{"cover",		Tfid,	nil,	offsetof(Album, c[0]),		0},
-	{"cover-small",	Tfid,	nil,	offsetof(Album, csmall[0]),	0},
-	{"cover-large",	Tfid,	nil,	offsetof(Album, clarge[0]),	0},
-	{"artist-id",	Tid,	nil,	offsetof(Album, aid[0]),	0},
-	{"id",			Tid,	nil,	offsetof(Album, id[0]),		0},
+	{"popularity",  Tfloat, nil,   offsetof(Album, pop),       0},
+	{"name",        Tstr,   nil,   offsetof(Album, name),      0},
+	{"artist-name", Tstr,   nil,   offsetof(Album, aname),     0},
+	{"album-type",  Tstr,   nil,   offsetof(Album, atype),     0},
+	{"review",      Tstr,   nil,   offsetof(Album, review),    0},
+	{"copyright",   Tcmplx, copy,  offsetof(Album, copy),      sizeof(Copy)},
+	{"discs",       Tlist,  &disc, offsetof(Album, discs),     0},
+	{"cover",       Tfid,   nil,   offsetof(Album, c[0]),      0},
+	{"cover-small", Tfid,   nil,   offsetof(Album, csmall[0]), 0},
+	{"cover-large", Tfid,   nil,   offsetof(Album, clarge[0]), 0},
+	{"artist-id",   Tid,    nil,   offsetof(Album, aid[0]),    0},
+	{"id",          Tid,    nil,   offsetof(Album, id[0]),     0},
 	end
 };
 
 static Xml album = {"album", Tcmplx, albumfields, 0, sizeof(Album)};
 
 static Xml filefields[] = {
-	{"id",			Tfid,	nil,	offsetof(Sfile, id[0]),		0},
-	{"format",		Tstr,	nil,	offsetof(Sfile, fmt),		0},
+	{"id",     Tfid, nil, offsetof(Sfile, id[0]), 0},
+	{"format", Tstr, nil, offsetof(Sfile, fmt),   0},
 	end
 };
 
 static Xml file = {"file", Tcmplx, filefields, 0, sizeof(Sfile)};
 
 static Xml trackfields[] = {
-	{"track-number",	Tint,	nil,	offsetof(Track, n),			0},
-	{"year",			Tint,	nil,	offsetof(Track, year),		0},
-	{"length",			Tint,	nil,	offsetof(Track, len),		0},
-	{"title",			Tstr,	nil,	offsetof(Track, name),		0},
-	{"artist",			Tstr,	nil,	offsetof(Track, aname),		0},
-	{"album",			Tstr,	nil,	offsetof(Track, alname),	0},
-	{"album-artist",	Tstr,	nil,	offsetof(Track, aaname),	0},
-	{"files",			Tlist,	&file,	offsetof(Track, files),		0},
-	{"popularity",		Tfloat,	nil,	offsetof(Track, pop),		0},
-	{"explicit",		Tbool,	nil,	offsetof(Track, ☺),			0},
-	{"id",				Tid,	nil,	offsetof(Track, id[0]),		0},
-	{"artist-id",		Tid,	nil,	offsetof(Track, aid[0]),	0},
-	{"album-id",		Tid,	nil,	offsetof(Track, alid[0]),	0},
-	{"album-artist-id",	Tid,	nil,	offsetof(Track, aaid[0]),	0},
-	{"cover",			Tfid,	nil,	offsetof(Track, c[0]),		0},
-	{"cover-small",		Tfid,	nil,	offsetof(Track, csmall[0]),	0},
-	{"cover-large",		Tfid,	nil,	offsetof(Track, clarge[0]),	0},
+	{"track-number",    Tint,   nil,    offsetof(Track, n),         0},
+	{"year",            Tint,   nil,    offsetof(Track, year),      0},
+	{"length",          Tint,   nil,    offsetof(Track, len),       0},
+	{"title",           Tstr,   nil,    offsetof(Track, name),      0},
+	{"artist",          Tstr,   nil,    offsetof(Track, aname),     0},
+	{"album",           Tstr,   nil,    offsetof(Track, alname),    0},
+	{"album-artist",    Tstr,   nil,    offsetof(Track, aaname),    0},
+	{"files",           Tlist,  &file,  offsetof(Track, files),     0},
+	{"popularity",      Tfloat, nil,    offsetof(Track, pop),       0},
+	{"explicit",        Tbool,  nil,    offsetof(Track, explicit),  0},
+	{"id",              Tid,    nil,    offsetof(Track, id[0]),     0},
+	{"artist-id",       Tid,    nil,    offsetof(Track, aid[0]),    0},
+	{"album-id",        Tid,    nil,    offsetof(Track, alid[0]),   0},
+	{"album-artist-id", Tid,    nil,    offsetof(Track, aaid[0]),   0},
+	{"cover",           Tfid,   nil,    offsetof(Track, c[0]),      0},
+	{"cover-small",     Tfid,   nil,    offsetof(Track, csmall[0]), 0},
+	{"cover-large",     Tfid,   nil,    offsetof(Track, clarge[0]), 0},
 	end
 };
 
 static Xml track = {"track", Tcmplx, trackfields, 0, sizeof(Track)};
 
 static Xml searchfields[] = {
-	{"artists",			Tlist,	&artist,	offsetof(Search, artists),		0},
-	{"albums",			Tlist,	&album,		offsetof(Search, albums),		0},
-	{"tracks",			Tlist,	&track,		offsetof(Search, tracks),		0},
+	{"artists", Tlist, &artist, offsetof(Search, artists), 0},
+	{"albums",  Tlist, &album,  offsetof(Search, albums),  0},
+	{"tracks",  Tlist, &track,  offsetof(Search, tracks),  0},
 	end
 };
 
@@ -390,22 +389,22 @@ static void
 hex2hash(char *hex, uchar *hash, int size)
 {
 	static uchar h2d[] = {
-		['0']	0,
-		['1']	1,
-		['2']	2,
-		['3']	3,
-		['4']	4,
-		['5']	5,
-		['6']	6,
-		['7']	7,
-		['8']	8,
-		['9']	9,
-		['a']	10,
-		['b']	11,
-		['c']	12,
-		['d']	13,
-		['e']	14,
-		['f']	15,
+		['0'] 0,
+		['1'] 1,
+		['2'] 2,
+		['3'] 3,
+		['4'] 4,
+		['5'] 5,
+		['6'] 6,
+		['7'] 7,
+		['8'] 8,
+		['9'] 9,
+		['a'] 10,
+		['b'] 11,
+		['c'] 12,
+		['d'] 13,
+		['e'] 14,
+		['f'] 15,
 	};
 	int i;
 
